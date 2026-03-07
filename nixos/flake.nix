@@ -20,6 +20,8 @@
 
           hardware.graphics.enable32Bit = true;
 
+          boot.kernelModules = [ "gve" ];
+          boot.initrd.kernelModules = [ "gve" ];
 
           environment.systemPackages = with pkgs; [
             git
