@@ -3,5 +3,8 @@
 *.tfstate
 *.tfstate.*
 
+# nixos
+debug-local.nix
+
 # Vars
 terraform.tfvars

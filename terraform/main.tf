@@ -10,11 +10,11 @@ module "network" {
 }
 
 module "compute" {
-  source      = "./modules/compute"
-  project_id  = var.project_id
-  region      = var.region
-  subnet_id   = module.network.subnet_id         
-  bucket_name = module.storage.bucket_name       
-  server_ip   = module.network.static_ip_address 
+  source         = "./modules/compute"
+  project_id     = var.project_id
+  region         = var.region
+  subnet_id      = module.network.subnet_id
+  bucket_name    = module.storage.bucket_name
+  server_ip      = module.network.static_ip_address
   ssh_public_key = var.ssh_public_key
 }

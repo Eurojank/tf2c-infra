@@ -5,32 +5,47 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
   };
 
-  outputs = { self, nixpkgs, ... }: {
+  outputs = { nixpkgs, ... }: let
+    debugModulePath = ./debug-local.nix;
+    debugModules =
+      if builtins.pathExists debugModulePath
+      then [ debugModulePath ]
+      else [ ];
+  in {
     nixosConfigurations.tf2-gcp = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
-      modules = [
-        "${nixpkgs}/nixos/modules/virtualisation/google-compute-image.nix"
-        
-        ({ pkgs, modulesPath, ... }: {
-          networking.hostName = "tf2-server";
-          
-          services.openssh.enable = true;
 
-          nixpkgs.config.allowUnfree = true;
+      modules =
+        [
+          "${nixpkgs}/nixos/modules/virtualisation/google-compute-image.nix"
 
-          boot.kernelModules = [ "gve" ];
-          boot.initrd.kernelModules = [ "gve" ];
+          ({ pkgs, ... }: {
+            networking.hostName = "tf2-server";
 
-          environment.systemPackages = with pkgs; [
-            git
-            vim
-            tmux
-            screen
-          ];
-         
-          system.stateVersion = "25.11";
-        })
-      ];
+            services.openssh = {
+              enable = true;
+              settings = {
+                PasswordAuthentication = false;
+                PermitRootLogin = "no";
+                UsePAM = false;
+              };
+            };
+
+            users.users.tf2 = {
+              isNormalUser = true;
+              createHome = true;
+              home = "/home/tf2";
+              extraGroups = [ "wheel" ];
+              shell = pkgs.bashInteractive;
+            };
+
+            boot.kernelModules = [ "gve" ];
+            boot.initrd.kernelModules = [ "gve" ];
+
+            system.stateVersion = "25.11";
+          })
+        ]
+        ++ debugModules;
     };
   };
 }
